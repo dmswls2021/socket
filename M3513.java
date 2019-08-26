@@ -52,6 +52,14 @@ public class M3513 extends JFrame{
 		
 		
 		JButton join = new JButton("채팅방 참가");
+		join.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				CliFrame();
+				dispose();
+			}
+		});
 		join.setLocation(165, 390);
 		join.setSize(200,50);
 		c.add(join);
@@ -83,6 +91,38 @@ public class M3513 extends JFrame{
 			public void actionPerformed(ActionEvent e) {
 				serverNick = nickname.getText();
 				System.out.println(serverNick);
+			}
+		});
+		change.setBounds(390, 50, 80, 20);
+		c.add(change);
+		
+		
+		f.setSize(550,700);
+		f.setVisible(true);
+	}
+	
+	public void CliFrame() {
+		JFrame f = new JFrame("서버/채팅방 생성");
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		Container c = f.getContentPane();
+		c.setLayout(null); 
+		
+		JLabel nick = new JLabel("닉네임");
+		nick.setBounds(100, 50, 100, 20);
+		c.add(nick);
+		
+		JTextField nickname = new JTextField();
+		nickname.setBounds(170, 50, 200, 20);
+		c.add(nickname);
+		
+		JButton change = new JButton("변경");
+		change.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				clientNick = nickname.getText();
+				System.out.println(clientNick);
 			}
 		});
 		change.setBounds(390, 50, 80, 20);
