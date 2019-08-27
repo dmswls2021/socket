@@ -1,14 +1,18 @@
-
-
+import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.InetAddress;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+
+import org.omg.CORBA.Request;
 
 public class M3513 extends JFrame{
 	String serverNick;
@@ -56,8 +60,7 @@ public class M3513 extends JFrame{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				CliFrame();
-				dispose();
+				Client cli = new Client();
 			}
 		});
 		join.setLocation(165, 390);
@@ -102,7 +105,9 @@ public class M3513 extends JFrame{
 	}
 	
 	public void CliFrame() {
-		JFrame f = new JFrame("서버/채팅방 생성");
+		
+		
+		JFrame f = new JFrame("");
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		Container c = f.getContentPane();
@@ -128,9 +133,13 @@ public class M3513 extends JFrame{
 		change.setBounds(390, 50, 80, 20);
 		c.add(change);
 		
+		JLabel cliIp = new JLabel("내 IP");
+		cliIp.setBounds(100, 70, 100, 20);
+		c.add(cliIp);
 		
-		f.setSize(550,700);
-		f.setVisible(true);
+		JLabel cliip = new JLabel();
+		cliip.setBounds(170, 70, 220, 20);
+		c.add(cliip);
 	}
 	
 	public static void main(String[] args) {
