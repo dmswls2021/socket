@@ -9,12 +9,14 @@ import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -24,18 +26,58 @@ public class Server extends JFrame {
 	JTextArea textArea; //멤버 참조변수
 	JTextField Msg;
 	JButton send;
+	JLabel nick;
+	JTextField nickname;
+	JButton change;
+	JLabel openip;
+	JTextField openiptx;
+	JLabel openport;
+	JTextField openporttx;
+	JButton open;
 
 	ServerSocket serverSocket;
 	Socket socket;
 	DataInputStream dis;
 	DataOutputStream dos;
 	
+	public static String sernick;
+	public static int serverport = 10001;
+	public static String serverip;
+	
 	public Server() {		
+		InetAddress ip;
+		try {
+			ip = InetAddress.getLocalHost();
+			serverip = ip.getHostAddress();
+		} catch (UnknownHostException e2) {
+			e2.printStackTrace();
+		}
+		
+		
+
 		setTitle("서버/채팅방 생성");
 		setSize(550,700);
 		
+		JPanel nickPanel = new JPanel();
+		nickPanel.setLayout(new BorderLayout());
+		nick = new JLabel("   닉네임 |   ");
+		nickname = new JTextField();
+		change = new JButton("   변경   ");
+		change.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				sernick = nickname.getText();
+				System.out.print(sernick);
+			}
+		});
+		nickPanel.add(nick, BorderLayout.WEST);
+		nickPanel.add(nickname, BorderLayout.CENTER);
+		nickPanel.add(change, BorderLayout.EAST);
+		add(nickPanel, BorderLayout.NORTH);
+		
 		textArea = new JTextArea();		
-		textArea.setEditable(false); //쓰기 금지
+		textArea.setEditable(false);
 		JScrollPane scrollPane = new JScrollPane(textArea);
 		add(scrollPane,BorderLayout.CENTER);
 
@@ -46,7 +88,6 @@ public class Server extends JFrame {
 		send = new JButton("보내기");
 		msgPanel.add(Msg, BorderLayout.CENTER);
 		msgPanel.add(send, BorderLayout.EAST);
-		add(msgPanel,BorderLayout.SOUTH);
 
 		send.addActionListener(new ActionListener() {			
 
@@ -55,13 +96,46 @@ public class Server extends JFrame {
 				sendMessage();
 			}
 		});
+		
+		JPanel inforopenPanel = new JPanel();
+		inforopenPanel.setLayout(new BorderLayout());
+		JPanel inforip = new JPanel();
+		inforip.setLayout(new BorderLayout());
+		JPanel inforport = new JPanel();
+		inforport.setLayout(new BorderLayout());
+		JPanel openPanel = new JPanel();
+		openPanel.setLayout(new BorderLayout());
+		openip = new JLabel("   채팅방 IP |   ");
+		openiptx = new JTextField(serverip);
+		openiptx.setEditable(false);
+		openport = new JLabel("   채팅방 PORT |   ");
+		openporttx = new JTextField(Integer.toString(serverport));
+		open = new JButton("   열기   ");
+		open.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				serverip = openiptx.getText();
+				serverport = Integer.parseInt(openporttx.getText());
+				
+				ServerThread serverThread = new ServerThread();
+				serverThread.setDaemon(true);
+				serverThread.start();
+			}
+		});
+		inforip.add(openip,BorderLayout.WEST);
+		inforip.add(openiptx, BorderLayout.CENTER);
+		inforport.add(openport,BorderLayout.WEST);
+		inforport.add(openporttx, BorderLayout.CENTER);
+		inforopenPanel.add(inforip, BorderLayout.NORTH);
+		inforopenPanel.add(inforport, BorderLayout.SOUTH);
+		openPanel.add(inforopenPanel, BorderLayout.CENTER);
+		openPanel.add(open, BorderLayout.EAST);
+		openPanel.add(msgPanel, BorderLayout.NORTH);
+		add(openPanel, BorderLayout.SOUTH);
 
 		setVisible(true);
 		Msg.requestFocus();
-
-		ServerThread serverThread = new ServerThread();
-		serverThread.setDaemon(true);
-		serverThread.start();
 
 		addWindowListener(new WindowAdapter() {			
 			
@@ -86,18 +160,18 @@ public class Server extends JFrame {
 		@Override
 		public void run() {			
 			try {
-				serverSocket = new ServerSocket(10001);
+				serverSocket = new ServerSocket(serverport);
 				textArea.append("채팅방이 열렸습니다.\n");
 				textArea.append("상대방의 접속을 기다립니다.\n");				
 				socket = serverSocket.accept();
-				textArea.append(socket.getInetAddress().getHostAddress() + "님이 접속하셨습니다.\n");
+				textArea.append(Client.clinick + "님이 접속하셨습니다.\n");
 
 				dis = new DataInputStream(socket.getInputStream());
 				dos = new DataOutputStream(socket.getOutputStream());
 
 				while(true) {
 					String msg = dis.readUTF();
-					textArea.append(" ["+ clinick +"] : " + msg + "\n");
+					textArea.append(" ["+ Client.clinick +"] : " + msg + "\n");
 					textArea.setCaretPosition(textArea.getText().length());
 				}
 			} catch (IOException e) {
@@ -109,7 +183,7 @@ public class Server extends JFrame {
 	public void sendMessage() {	
 		String msg = Msg.getText();
 		Msg.setText("");
-		textArea.append(" [" + sernick + " : " + msg + "\n");
+		textArea.append(" [" + sernick + "] : " + msg + "\n");
 		textArea.setCaretPosition(textArea.getText().length());
 
 		Thread t = new Thread() {
